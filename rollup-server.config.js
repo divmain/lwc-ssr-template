@@ -39,7 +39,6 @@ export default [
           format: 'esm',
         },
         external: [
-          /node_modules/,
           '@lwc/engine-server',
         ],
         plugins: [
