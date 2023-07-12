@@ -1,13 +1,17 @@
-const fs = require('fs');
-const path = require('path');
-const express = require('express');
-const rollup = require('rollup');
-const prettier = require('prettier');
-const htmlEntities = require('html-entities');
-const engineServer = require('@lwc/engine-server');
+// eslint-disable no-console
 
-const rollupConfig = require('./rollup-server.config.js');
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+import path from 'path';
+import express from 'express';
+import * as rollup from 'rollup';
+import prettier from 'prettier';
+import htmlEntities from 'html-entities';
+import engineServer from '@lwc/engine-server';
 
+import rollupConfig from './rollup-server.config.js';
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const PORT = 3000;
 const app = express();
 app.use(express.static('dist'));
@@ -64,12 +68,12 @@ const htmlTemplate = ({ markup, prettifiedMarkup, compiledComponentCode, props }
 </html>
 `;
 
-function buildResponse(props) {
+const compiledComponentPath = path.resolve(__dirname, './dist/app.js');
+
+async function buildResponse(props) {
   globalThis.lwc = engineServer;
 
-  const compiledComponentPath = path.resolve(__dirname, './dist/app.js');
-  delete require.cache[require.resolve(compiledComponentPath)];
-  const cmp = require(compiledComponentPath);
+  const cmp = (await import(`${compiledComponentPath}?cacheBust=${Date.now()}`)).default;
   const renderedMarkup = engineServer.renderComponent('x-parent', cmp, props);
 
   return htmlTemplate({
@@ -83,9 +87,9 @@ function buildResponse(props) {
   });
 }
 
-app.get('/ssr', (req, res) => {
+app.get('/ssr', async (req, res) => {
   const componentProps = req.query.props || {};
-  return res.send(buildResponse(componentProps));
+  return res.send(await buildResponse(componentProps));
 });
 
 app.get('/csr', (req, res) => {

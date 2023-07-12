@@ -1,13 +1,13 @@
 // This config is used when running the dev server with live reload.
 
-const lwc = require('@lwc/rollup-plugin');
-const replace = require('@rollup/plugin-replace');
-const serve = require('rollup-plugin-serve');
-const livereload = require('rollup-plugin-livereload');
+import lwc from '@lwc/rollup-plugin';
+import replace from '@rollup/plugin-replace';
+import serve from 'rollup-plugin-serve';
+import livereload from 'rollup-plugin-livereload';
 
 const __ENV__ = process.env.NODE_ENV ?? 'development';
 
-module.exports = (args) => ({
+export default (args) => ({
     input: 'src/entry-client.js',
     output: {
         file: 'dist/entry-client.js',

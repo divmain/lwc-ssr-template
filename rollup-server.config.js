@@ -1,14 +1,14 @@
 // This config is used when running `server.js`.
 
-const lwc = require('@lwc/rollup-plugin');
-const replace = require('@rollup/plugin-replace');
-const alias = require('@rollup/plugin-alias');
+import lwc from '@lwc/rollup-plugin';
+import replace from '@rollup/plugin-replace';
+import alias from '@rollup/plugin-alias';
+import simpleRollupConfig from'./rollup.config.js';
 
-const simpleRollupConfig = require('./rollup.config.js');
+const ENV = process.env.NODE_ENV ?? 'development';
 
-const __ENV__ = process.env.NODE_ENV ?? 'development';
 
-module.exports = [
+export default [
     // Client-only build.
     simpleRollupConfig({ watch: false }),
 
@@ -22,7 +22,7 @@ module.exports = [
         plugins: [
           lwc(),
           replace({
-            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+            'process.env.NODE_ENV': JSON.stringify(ENV),
             preventAssignment: true,
           }),
         ],
@@ -36,15 +36,17 @@ module.exports = [
         input: 'src/app.js',
         output: {
           file: 'dist/app.js',
-          format: 'cjs',
+          format: 'esm',
         },
-        external: [/node_modules/],
-        // external: ['lwc'],
+        external: [
+          /node_modules/,
+          '@lwc/engine-server',
+        ],
         plugins: [
           alias({
             entries: [{
               find: 'lwc',
-              replacement: require.resolve('@lwc/engine-server'),
+              replacement: '@lwc/engine-server',
             }],
           }),
           replace({
