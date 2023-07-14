@@ -12,6 +12,7 @@ export default (args) => ({
     output: {
         file: 'dist/entry-client.js',
         format: 'esm',
+        inlineDynamicImports: true,
     },
     plugins: [
         replace({

@@ -17,7 +17,8 @@ export default [
         input: 'src/entry-client-ssr.js',
         output: {
           file: 'dist/entry-rehydrate.js',
-          format: 'cjs'
+          format: 'cjs',
+          inlineDynamicImports: true,
         },
         plugins: [
           lwc(),
@@ -37,6 +38,7 @@ export default [
         output: {
           file: 'dist/app.js',
           format: 'esm',
+          inlineDynamicImports: true,
         },
         external: [
           '@lwc/engine-server',
@@ -50,7 +52,6 @@ export default [
           }),
           replace({
             'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-            'await import(': `typeof document === 'undefined' ? (() => { throw new Error('Cannot use await import in SSR.') })() : await import(`,
             preventAssignment: true,
           }),
           lwc(),
