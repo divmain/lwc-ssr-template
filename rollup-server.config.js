@@ -9,55 +9,55 @@ const ENV = process.env.NODE_ENV ?? 'development';
 
 
 export default [
-    // Client-only build.
-    simpleRollupConfig({ watch: false }),
+  // Client-only build.
+  simpleRollupConfig({ watch: false }),
 
-    // Client build to rehydrate after SSR.
-    {
-        input: 'src/entry-client-ssr.js',
-        output: {
-          file: 'dist/entry-rehydrate.js',
-          format: 'cjs',
-          inlineDynamicImports: true,
-        },
-        plugins: [
-          lwc(),
-          replace({
-            'process.env.NODE_ENV': JSON.stringify(ENV),
-            preventAssignment: true,
-          }),
-        ],
-        watch: {
-          exclude: ["node_modules/**"]
-        }
-      },
+  // Client build to rehydrate after SSR.
+  {
+    input: 'src/entry-client-ssr.js',
+    output: {
+      file: 'dist/entry-rehydrate.js',
+      format: 'cjs',
+      inlineDynamicImports: true,
+    },
+    plugins: [
+      lwc(),
+      replace({
+        'process.env.NODE_ENV': JSON.stringify(ENV),
+        preventAssignment: true,
+      }),
+    ],
+    watch: {
+      exclude: ["node_modules/**"]
+    }
+  },
 
-    // Component code only, for import during server-side rendering.
-    {
-        input: 'src/app.js',
-        output: {
-          file: 'dist/app.js',
-          format: 'esm',
-          inlineDynamicImports: true,
-        },
-        external: [
-          '@lwc/engine-server',
-        ],
-        plugins: [
-          alias({
-            entries: [{
-              find: 'lwc',
-              replacement: '@lwc/engine-server',
-            }],
-          }),
-          replace({
-            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-            preventAssignment: true,
-          }),
-          lwc(),
-        ].filter(Boolean),
-        watch: {
-          exclude: ["node_modules/**"]
-        }
-      },
+  // Component code only, for import during server-side rendering.
+  {
+    input: 'src/app.js',
+    output: {
+      file: 'dist/app.js',
+      format: 'esm',
+      inlineDynamicImports: true,
+    },
+    external: [
+      '@lwc/engine-server',
+    ],
+    plugins: [
+      alias({
+        entries: [{
+          find: 'lwc',
+          replacement: '@lwc/engine-server',
+        }],
+      }),
+      replace({
+        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+        preventAssignment: true,
+      }),
+      lwc(),
+    ].filter(Boolean),
+    watch: {
+      exclude: ["node_modules/**"]
+    }
+  },
 ];
