@@ -48,12 +48,12 @@ const htmlTemplate = ({ markup, prettifiedMarkup, compiledComponentCode, props }
       </div>
     </div>
     <hr />
-    <h3>Prettified Markup:</h3>
+    <h3>Prettified SSR Markup:</h3>
     <div class="container">
       <pre>${prettifiedMarkup}</pre>
     </div>
     <hr />
-    <h3>Compiled Component Code:</h3>
+    <h3>Compiled Server-side Component Code:</h3>
     <div class="container">
       <pre>${compiledComponentCode}</pre>
     </div>
