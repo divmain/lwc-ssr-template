@@ -24,6 +24,7 @@ export default [
       lwc(),
       replace({
         'process.env.NODE_ENV': JSON.stringify(ENV),
+        'import.meta.env.SSR': 'false',
         preventAssignment: true,
       }),
     ],
@@ -52,6 +53,7 @@ export default [
       }),
       replace({
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+        'import.meta.env.SSR': 'true',
         preventAssignment: true,
       }),
       lwc(),

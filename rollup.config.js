@@ -17,6 +17,7 @@ export default (args) => ({
   plugins: [
     replace({
       'process.env.NODE_ENV': JSON.stringify(__ENV__),
+      'import.meta.env.SSR': 'false',
       preventAssignment: true,
     }),
     lwc(),
