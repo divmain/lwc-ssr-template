@@ -38,6 +38,7 @@ const htmlTemplate = ({ markup, prettifiedMarkup, compiledComponentCode, props }
       border-color: black;
     }
     pre {
+      overflow-x: auto;
       margin: 0;
     }
     </style>
