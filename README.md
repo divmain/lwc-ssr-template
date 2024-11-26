@@ -1,3 +1,3 @@
 # LWC playground
 
-A simple LWC setup for experiments and bug reproductions involving SSR & hydration.
+A simple LWC setup for experiments and bug reproductions involving the new SSR compiler & hydration.

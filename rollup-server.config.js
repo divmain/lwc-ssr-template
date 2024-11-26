@@ -43,6 +43,7 @@ export default [
     },
     external: [
       '@lwc/engine-server',
+      '@lwc/ssr-runtime',
     ],
     plugins: [
       alias({
@@ -56,7 +57,10 @@ export default [
         'import.meta.env.SSR': 'true',
         preventAssignment: true,
       }),
-      lwc(),
+      lwc({
+        targetSSR: true,
+        ssrMode: 'sync',
+      }),
     ].filter(Boolean),
     watch: {
       exclude: ["node_modules/**"]

@@ -8,6 +8,8 @@ import * as rollup from 'rollup';
 import prettier from 'prettier';
 import htmlEntities from 'html-entities';
 import engineServer from '@lwc/engine-server';
+import ssrRuntime from '@lwc/ssr-runtime';
+import lwcRollupPlugin from '@lwc/rollup-plugin';
 
 import rollupConfig from './rollup-server.config.js';
 
@@ -74,7 +76,7 @@ async function buildResponse(props) {
   globalThis.lwc = engineServer;
 
   const cmp = (await import(`${compiledComponentPath}?cacheBust=${Date.now()}`)).default;
-  const renderedMarkup = engineServer.renderComponent('x-parent', cmp, props);
+  const renderedMarkup = await ssrRuntime.serverSideRenderComponent('x-parent', cmp, props);
 
   return htmlTemplate({
     markup: renderedMarkup,
