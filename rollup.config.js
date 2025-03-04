@@ -18,6 +18,7 @@ export default (args) => ({
     replace({
       'process.env.NODE_ENV': JSON.stringify(__ENV__),
       'import.meta.env.SSR': 'false',
+      'process.env.SKIP_LWC_VERSION_MISMATCH_CHECK': 'false',
       preventAssignment: true,
     }),
     lwc(),
