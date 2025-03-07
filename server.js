@@ -71,7 +71,11 @@ const htmlTemplate = ({ ver, markup, prettifiedMarkup, compiledComponentCode, pr
 </html>
 `;
 
+const rootComponentPropsPath = path.resolve(__dirname, 'src/rootProps.json');
 const getCompiledComponentPath = (ver) => path.resolve(__dirname, `./dist/app-${ver}.js`);
+const getRootComponentProps = (req) => req.query.props
+  ? JSON.parse(req.query.props)
+  : JSON.parse(fs.readFileSync(rootComponentPropsPath, 'utf8'));
 
 async function renderMarkup(ver, props) {
   const compiledComponentPath = getCompiledComponentPath(ver);
@@ -98,21 +102,17 @@ async function buildResponse(ver, props) {
 }
 
 app.get('/ssr-v2', async (req, res) => {
-  const componentProps = req.query.props || {};
+  const componentProps = getRootComponentProps(req);
   return res.send(await buildResponse('v2', componentProps));
 });
 
 app.get('/ssr-v1', async (req, res) => {
-  const componentProps = req.query.props || {};
+  const componentProps = getRootComponentProps(req);
   return res.send(await buildResponse('v1', componentProps));
 });
 
-app.get('/ssr-diff', async (req, res) => {
-  return res.sendFile(path.resolve(__dirname, './static/diff.html'));
-});
-
 app.get('/ssr-output.json', async (req, res) => {
-  const componentProps = req.query.props || {};
+  const componentProps = getRootComponentProps(req);
   const markupV1 = await renderMarkup('v1', structuredClone(componentProps));
   const markupV2 = await renderMarkup('v2', structuredClone(componentProps));
   const formattedMarkupV1 = formatHTML(markupV1);
@@ -126,6 +126,10 @@ app.get('/ssr-output.json', async (req, res) => {
     formattedMarkupV1,
     formattedMarkupV2,
   }));
+});
+
+app.get('/ssr-diff', async (req, res) => {
+  return res.sendFile(path.resolve(__dirname, './static/diff.html'));
 });
 
 app.get('/csr', (req, res) => {
