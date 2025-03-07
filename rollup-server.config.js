@@ -33,17 +33,49 @@ export default [
     }
   },
 
-  // Component code only, for import during server-side rendering.
+  // Component compiled with SSRv2. For import during server-side rendering.
   {
     input: 'src/app.js',
     output: {
-      file: 'dist/app.js',
+      file: 'dist/app-v2.js',
       format: 'esm',
       inlineDynamicImports: true,
     },
     external: [
-      '@lwc/engine-server',
       '@lwc/ssr-runtime',
+    ],
+    plugins: [
+      alias({
+        entries: [{
+          find: 'lwc',
+          replacement: '@lwc/ssr-runtime',
+        }],
+      }),
+      replace({
+        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+        'import.meta.env.SSR': 'true',
+        preventAssignment: true,
+      }),
+      lwc({
+        targetSSR: true,
+        ssrMode: 'sync',
+      }),
+    ].filter(Boolean),
+    watch: {
+      exclude: ["node_modules/**"]
+    }
+  },
+
+  // Component compiled with SSRv1. For import during server-side rendering.
+  {
+    input: 'src/app.js',
+    output: {
+      file: 'dist/app-v1.js',
+      format: 'esm',
+      inlineDynamicImports: true,
+    },
+    external: [
+      '@lwc/engine-server'
     ],
     plugins: [
       alias({
@@ -57,10 +89,7 @@ export default [
         'import.meta.env.SSR': 'true',
         preventAssignment: true,
       }),
-      lwc({
-        targetSSR: true,
-        ssrMode: 'sync',
-      }),
+      lwc(),
     ].filter(Boolean),
     watch: {
       exclude: ["node_modules/**"]

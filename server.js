@@ -18,7 +18,7 @@ const PORT = 3000;
 const app = express();
 app.use(express.static('dist'));
 
-const htmlTemplate = ({ markup, prettifiedMarkup, compiledComponentCode, props }) => `
+const htmlTemplate = ({ ver, markup, prettifiedMarkup, compiledComponentCode, props }) => `
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -44,19 +44,19 @@ const htmlTemplate = ({ markup, prettifiedMarkup, compiledComponentCode, props }
     </style>
   </head>
   <body>
-    <h3>Rendered Component</h3>
+    <h3>Rendered Component (SSR${ver})</h3>
     <div class="container">
       <div id="main">
           ${markup}    
       </div>
     </div>
     <hr />
-    <h3>Prettified SSR Markup:</h3>
+    <h3>Prettified SSR${ver} Markup:</h3>
     <div class="container">
       <pre>${prettifiedMarkup}</pre>
     </div>
     <hr />
-    <h3>Compiled Server-side Component Code:</h3>
+    <h3>Compiled Component Code (${ver}):</h3>
     <div class="container">
       <pre>${compiledComponentCode}</pre>
     </div>
@@ -71,13 +71,15 @@ const htmlTemplate = ({ markup, prettifiedMarkup, compiledComponentCode, props }
 </html>
 `;
 
-const compiledComponentPath = path.resolve(__dirname, './dist/app.js');
+const getCompiledComponentPath = (ver) => path.resolve(__dirname, `./dist/app-${ver}.js`);
 
-async function buildResponse(props) {
-  globalThis.lwc = engineServer;
+async function buildResponse(ver, props) {
+  const compiledComponentPath = getCompiledComponentPath(ver);
 
   const cmp = (await import(`${compiledComponentPath}?cacheBust=${Date.now()}`)).default;
-  const renderedMarkup = await ssrRuntime.serverSideRenderComponent('x-parent', cmp, props);
+  const renderedMarkup = ver === 'v1'
+    ? engineServer.renderComponent('x-parent', cmp, props)
+    : await ssrRuntime.serverSideRenderComponent('x-parent', cmp, props);
 
   return htmlTemplate({
     markup: renderedMarkup,
@@ -87,12 +89,18 @@ async function buildResponse(props) {
     })),
     compiledComponentCode: htmlEntities.encode(fs.readFileSync(compiledComponentPath, 'utf8')),
     props: JSON.stringify(props),
+    ver,
   });
 }
 
-app.get('/ssr', async (req, res) => {
+app.get('/ssr-v2', async (req, res) => {
   const componentProps = req.query.props || {};
-  return res.send(await buildResponse(componentProps));
+  return res.send(await buildResponse('v2', componentProps));
+});
+
+app.get('/ssr-v1', async (req, res) => {
+  const componentProps = req.query.props || {};
+  return res.send(await buildResponse('v1', componentProps));
 });
 
 app.get('/csr', (req, res) => {
