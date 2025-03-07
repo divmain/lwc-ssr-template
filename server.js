@@ -87,7 +87,7 @@ async function renderMarkup(ver, props) {
 }
 
 async function buildResponse(ver, props) {
-  const renderedMarkup = renderMarkup(ver, props);
+  const renderedMarkup = await renderMarkup(ver, props);
 
   return htmlTemplate({
     markup: renderedMarkup,
