@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Diff SSR Output</title>
+    <script type="module">
+      import "https://cdn.jsdelivr.net/npm/diff-view-element";
+      const ssrOutputR = await fetch('/ssr-output.json');
+      const {
+        componentProps,
+        markupV1,
+        markupV2,
+        formattedMarkupV1,
+        formattedMarkupV2,
+      } = await ssrOutputR.json();
+
+      const diffViewFormattedMarkup = document.createElement('diff-view-element');
+      diffViewFormattedMarkup.setAttribute('old-value', formattedMarkupV1);
+      diffViewFormattedMarkup.setAttribute('new-value', formattedMarkupV2);
+      diffViewFormattedMarkup.setAttribute('language', 'html');
+      diffViewFormattedMarkup.setAttribute('preserve-whitespace', true);
+      document.querySelector('#formatted-markup').appendChild(diffViewFormattedMarkup);
+
+      const diffViewMarkup = document.createElement('diff-view-element');
+      diffViewMarkup.setAttribute('old-value', markupV1);
+      diffViewMarkup.setAttribute('new-value', markupV2);
+      diffViewMarkup.setAttribute('language', 'html');
+      diffViewMarkup.setAttribute('preserve-whitespace', true);
+      document.querySelector('#markup').appendChild(diffViewMarkup);
+
+      document.querySelector('#props').innerHTML = JSON.stringify(componentProps, null, 2);
+    </script>
+  </head>
+  <body>
+    <h3>Diff Markup v1 vs v2</h3>
+    <div class="container">
+        <h4>Root Component Props</h4>
+        <pre id="props"></pre>
+      <div id="main">
+        <h4>Formatted Markup</h4>
+        <div id="formatted-markup"></div>
+        <h4>Raw Markup</h4>
+        <div id="markup"></div>
+      </div>
+    </div>
+  </body>
+</html>

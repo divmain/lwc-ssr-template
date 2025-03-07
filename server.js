@@ -12,6 +12,7 @@ import ssrRuntime from '@lwc/ssr-runtime';
 import lwcRollupPlugin from '@lwc/rollup-plugin';
 
 import rollupConfig from './rollup-server.config.js';
+import { formatHTML } from './util/formatHtml.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const PORT = 3000;
@@ -30,24 +31,24 @@ const htmlTemplate = ({ ver, markup, prettifiedMarkup, compiledComponentCode, pr
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Server-Rendered Component</title>
     <style>
-    .container {
-      margin: 16px;
-      padding: 16px;
-      border-style: solid;
-      border-width: 2px;
-      border-color: black;
-    }
-    pre {
-      overflow-x: auto;
-      margin: 0;
-    }
+      .container {
+        margin: 16px;
+        padding: 16px;
+        border-style: solid;
+        border-width: 2px;
+        border-color: black;
+      }
+      pre {
+        overflow-x: auto;
+        margin: 0;
+      }
     </style>
   </head>
   <body>
     <h3>Rendered Component (SSR${ver})</h3>
     <div class="container">
       <div id="main">
-          ${markup}    
+          ${markup}
       </div>
     </div>
     <hr />
@@ -60,7 +61,6 @@ const htmlTemplate = ({ ver, markup, prettifiedMarkup, compiledComponentCode, pr
     <div class="container">
       <pre>${compiledComponentCode}</pre>
     </div>
-    </footer>
   </body>
   <script>
     window.lwcRuntimeFlags = window.lwcRuntimeFlags || {};
@@ -73,13 +73,17 @@ const htmlTemplate = ({ ver, markup, prettifiedMarkup, compiledComponentCode, pr
 
 const getCompiledComponentPath = (ver) => path.resolve(__dirname, `./dist/app-${ver}.js`);
 
-async function buildResponse(ver, props) {
+async function renderMarkup(ver, props) {
   const compiledComponentPath = getCompiledComponentPath(ver);
 
   const cmp = (await import(`${compiledComponentPath}?cacheBust=${Date.now()}`)).default;
-  const renderedMarkup = ver === 'v1'
+  return ver === 'v1'
     ? engineServer.renderComponent('x-parent', cmp, props)
     : await ssrRuntime.serverSideRenderComponent('x-parent', cmp, props);
+}
+
+async function buildResponse(ver, props) {
+  const renderedMarkup = renderMarkup(ver, props);
 
   return htmlTemplate({
     markup: renderedMarkup,
@@ -101,6 +105,27 @@ app.get('/ssr-v2', async (req, res) => {
 app.get('/ssr-v1', async (req, res) => {
   const componentProps = req.query.props || {};
   return res.send(await buildResponse('v1', componentProps));
+});
+
+app.get('/ssr-diff', async (req, res) => {
+  return res.sendFile(path.resolve(__dirname, './static/diff.html'));
+});
+
+app.get('/ssr-output.json', async (req, res) => {
+  const componentProps = req.query.props || {};
+  const markupV1 = await renderMarkup('v1', structuredClone(componentProps));
+  const markupV2 = await renderMarkup('v2', structuredClone(componentProps));
+  const formattedMarkupV1 = formatHTML(markupV1);
+  const formattedMarkupV2 = formatHTML(markupV2);
+  const stringifiedProps = JSON.stringify(componentProps, null, 2);
+
+  return res.send(JSON.stringify({
+    componentProps,
+    markupV1,
+    markupV2,
+    formattedMarkupV1,
+    formattedMarkupV2,
+  }));
 });
 
 app.get('/csr', (req, res) => {

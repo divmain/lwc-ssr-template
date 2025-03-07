@@ -11,6 +11,7 @@
     "dependencies": {
         "@lwc/engine-server": "^8.16.0",
         "@lwc/rollup-plugin": "^8.16.0",
+        "@lwc/shared": "^8.16.0",
         "@lwc/ssr-compiler": "^8.16.0",
         "@lwc/ssr-runtime": "^8.16.0",
         "@rollup/plugin-alias": "^4.0.2",
