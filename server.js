@@ -117,7 +117,6 @@ app.get('/ssr-output.json', async (req, res) => {
   const markupV2 = await renderMarkup('v2', structuredClone(componentProps));
   const formattedMarkupV1 = formatHTML(markupV1);
   const formattedMarkupV2 = formatHTML(markupV2);
-  const stringifiedProps = JSON.stringify(componentProps, null, 2);
 
   return res.send(JSON.stringify({
     componentProps,
