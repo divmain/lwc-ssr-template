@@ -79,14 +79,15 @@ const getRootComponentProps = (req) => req.query.props
 
 async function renderMarkup(ver, props) {
   const compiledComponentPath = getCompiledComponentPath(ver);
-
   const cmp = (await import(`${compiledComponentPath}?cacheBust=${Date.now()}`)).default;
+
   return ver === 'v1'
     ? engineServer.renderComponent('x-parent', cmp, props)
     : await ssrRuntime.serverSideRenderComponent('x-parent', cmp, props);
 }
 
 async function buildResponse(ver, props) {
+  const compiledComponentPath = getCompiledComponentPath(ver);
   const renderedMarkup = await renderMarkup(ver, props);
 
   return htmlTemplate({
